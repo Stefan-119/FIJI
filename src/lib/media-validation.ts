@@ -25,10 +25,13 @@ export function isVideoAvailable(videoUrl?: string): boolean {
 /**
  * Check if any items have real content (not just placeholders)
  */
-export function hasAvailableContent<T extends { image?: string; image?: string }>(
+export function hasAvailableContent<T extends { image?: string; thumbnail?: string }>(
   items: T[]
 ): boolean {
-  return items.some((item) => isImageAvailable(item.image));
+  // Check if either an image OR a thumbnail is available for any item
+  return items.some((item) => 
+    isImageAvailable(item.image) || isImageAvailable(item.thumbnail)
+  );
 }
 
 /**
