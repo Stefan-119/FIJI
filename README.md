@@ -30,7 +30,7 @@ cd fiji-website
 npm install
 ```
 
-Environment variables are optional for the current build. See `.env.example` if you add integrations later.
+Optional variables are documented in `.env.example`.
 
 ## Development
 
@@ -44,24 +44,37 @@ Open [http://localhost:3000](http://localhost:3000). Edit `src/app` and `src/com
 npm run lint
 ```
 
-## Production build
+## Production build (static export)
+
+This project uses **`output: 'export'`** so `next build` produces a static site in **`out/`**. There is **no Node server bundle** (`next start` is not used).
 
 ```bash
 npm run build
-npm run start
 ```
 
-Confirm all routes (`/`, `/about`, `/programs`, `/gallery`) and the contact/WhatsApp flow behave as expected before deploying.
+Locally, this emits assets for the **site root**. On GitHub Pages (project repo), CI sets **`STATIC_EXPORT_REPO`** so `basePath` / `assetPrefix` match `https://<user>.github.io/<repo>/`. See [`next.config.ts`](next.config.ts).
 
-## Deployment
+To reproduce a Pages-style build locally (PowerShell):
 
-Works on any host that supports Node for Next.js (e.g. [Vercel](https://vercel.com/), Docker, or a VPS):
+```powershell
+$env:STATIC_EXPORT_REPO = "FIJI"   # your GitHub repository name, no slash
+npm run build
+```
 
-1. Set `NODE_ENV=production` on the platform (typically automatic).
-2. Run `npm run build` then `npm run start`, or use the platform’s Next.js preset.
-3. Replace the WhatsApp `wa.me` number and any placeholder gallery/media copy before going live.
+## Deploy to GitHub Pages
 
-**Security:** Never commit `.env`, API keys, or private URLs. This repository uses a focused `.gitignore` so `.env.example` documents optional keys while real env files stay local.
+1. In the repo: **Settings → Pages → Build and deployment**, set **Source** to **GitHub Actions**.
+2. Push to **`main`**. The workflow [.github/workflows/nextjs.yml](.github/workflows/nextjs.yml) runs `npm ci`, `npm run build` with `STATIC_EXPORT_REPO` set from **`github.event.repository.name`**, and publishes **`./out`** with `deploy-pages`.
+
+If you rename the repository on GitHub, the next workflow run picks up the new subpath automatically (no manual edit for `basePath`).
+
+Replace the WhatsApp placeholder and any dummy gallery copy before announcing the site.
+
+## Deploy elsewhere
+
+Any static host can serve the **`out/`** folder after `npm run build` (respecting **`STATIC_EXPORT_REPO`** when the site lives under a subpath). Platforms that expect a **running Node `next start`** server need different config—this repo is optimized for **static / GitHub Pages** first.
+
+**Security:** Never commit `.env`, API keys, or private URLs.
 
 ## Project layout
 
