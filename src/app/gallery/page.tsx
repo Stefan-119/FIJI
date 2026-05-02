@@ -1,30 +1,30 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import SiteHeader from "@/components/site-header";
-
-const categories = [
-  "All",
-  "Kids Training",
-  "Women Self-Defense",
-  "Group Training",
-  "Events & Seminars",
-  "Private Classes",
-  "Community Activities",
-] as const;
-
-const galleryItems = [
-  { title: "Kids Fundamentals", category: "Kids Training", placeholder: "[Training Session Photo Placeholder]" },
-  { title: "Women Safety Workshop", category: "Women Self-Defense", placeholder: "[Training Session Photo Placeholder]" },
-  { title: "Group Technical Drill", category: "Group Training", placeholder: "[Training Session Photo Placeholder]" },
-  { title: "Seminar Demonstration", category: "Events & Seminars", placeholder: "[Seminar Video Placeholder]" },
-  { title: "Private Coaching Session", category: "Private Classes", placeholder: "[Training Session Photo Placeholder]" },
-  { title: "Community Sharing Day", category: "Community Activities", placeholder: "[Event Photo Placeholder]" },
-  { title: "Kids Partner Exercise", category: "Kids Training", placeholder: "[Training Session Photo Placeholder]" },
-  { title: "Instructor-Led Defense Class", category: "Women Self-Defense", placeholder: "[Training Session Photo Placeholder]" },
-  { title: "Organization Group Session", category: "Group Training", placeholder: "[Event Photo Placeholder]" },
-];
+import GalleryCard from "@/components/media/GalleryCard";
+import VideoCard from "@/components/media/VideoCard";
+import Lightbox from "@/components/media/Lightbox";
+import VideoLightbox from "@/components/media/VideoLightbox";
+import MediaGrid from "@/components/media/MediaGrid";
+import YouTubeCTA from "@/components/media/YouTubeCTA";
+import EmptyGalleryState from "@/components/media/EmptyGalleryState";
+import EmptyVideoSectionState from "@/components/media/EmptyVideoSectionState";
+import {
+  photoGalleryItems,
+  galleryCategories,
+  getGalleryItemsByCategory,
+  type GalleryCategory,
+} from "@/constants/gallery";
+import {
+  videoDocumentationItems,
+  videoDocumentationConfig,
+} from "@/constants/videos";
+import {
+  validateGalleryContent,
+  validateVideoContent,
+} from "@/lib/media-validation";
 
 function FadeInSection({
   children,
@@ -46,29 +46,38 @@ function FadeInSection({
 }
 
 export default function GalleryPage() {
-  const [activeCategory, setActiveCategory] = useState<(typeof categories)[number]>("All");
-  const [activeItem, setActiveItem] = useState<(typeof galleryItems)[number] | null>(null);
+  const [activeCategory, setActiveCategory] = useState<GalleryCategory>("All");
+  const [activeGalleryItem, setActiveGalleryItem] = useState<
+    (typeof photoGalleryItems)[number] | null
+  >(null);
+  const [activeVideoItem, setActiveVideoItem] = useState<
+    (typeof videoDocumentationItems)[number] | null
+  >(null);
+
   const year = useMemo(() => new Date().getFullYear(), []);
 
-  const filteredItems =
-    activeCategory === "All" ? galleryItems : galleryItems.filter((item) => item.category === activeCategory);
+  const filteredItems = getGalleryItemsByCategory(activeCategory);
+  const galleryValidation = validateGalleryContent(photoGalleryItems);
+  const videoValidation = validateVideoContent(videoDocumentationItems);
 
   return (
     <div className="bg-[#111111] text-white">
       <SiteHeader />
 
       <main>
+        {/* Header Section */}
         <section className="border-b border-white/10">
           <div className="mx-auto max-w-7xl px-5 py-16 md:px-8 md:py-20">
             <FadeInSection>
               <h1 className="text-4xl font-bold md:text-5xl">Gallery</h1>
               <p className="mt-4 max-w-3xl text-white/80">
-                Organized media showcase for FIJI training sessions, seminars, and community activities.
+                Organized media showcase for FIJI training sessions, seminars,
+                and community activities.
               </p>
             </FadeInSection>
 
             <div className="mt-7 flex flex-wrap gap-2">
-              {categories.map((category) => (
+              {galleryCategories.map((category) => (
                 <button
                   key={category}
                   className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
@@ -85,58 +94,103 @@ export default function GalleryPage() {
           </div>
         </section>
 
+        {/* Photo Gallery Section */}
         <section className="mx-auto max-w-7xl px-5 py-12 md:px-8 md:py-16">
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {filteredItems.map((item, idx) => (
-              <FadeInSection key={`${item.title}-${idx}`} delay={0.03 * idx}>
-                <button
-                  className="group h-full w-full rounded-2xl border border-white/10 bg-[#1B1B1B] p-4 text-left transition hover:-translate-y-1 hover:border-[#C62828]/70"
-                  onClick={() => setActiveItem(item)}
-                >
-                  <div className="rounded-xl border border-dashed border-white/20 bg-[#252525] px-3 py-12 text-center text-sm text-white/60 transition group-hover:border-[#C62828]/60">
-                    {item.placeholder}
-                  </div>
-                  <p className="mt-4 text-lg font-semibold">{item.title}</p>
-                  <p className="mt-1 text-sm text-white/70">{item.category}</p>
-                </button>
+          {galleryValidation.hasImages ? (
+            <MediaGrid columns="3">
+              {filteredItems.map((item, idx) => (
+                <FadeInSection key={`${item.id}-${idx}`} delay={0.03 * idx}>
+                  <GalleryCard
+                    title={item.title}
+                    category={item.category}
+                    image={item.image}
+                    placeholder={item.placeholder}
+                    onClick={() => setActiveGalleryItem(item)}
+                  />
+                </FadeInSection>
+              ))}
+            </MediaGrid>
+          ) : (
+            <EmptyGalleryState />
+          )}
+        </section>
+
+        {/* Video Documentation Section */}
+        <section className="border-t border-white/10 mx-auto max-w-7xl px-5 py-12 md:px-8 md:py-16">
+          <FadeInSection>
+            <h2 className="text-3xl font-bold md:text-4xl">
+              {videoDocumentationConfig.sectionTitle}
+            </h2>
+            <p className="mt-4 mb-8 max-w-3xl text-white/80">
+              Explore our curriculum through recorded sessions and technical
+              demonstrations.
+            </p>
+          </FadeInSection>
+
+          {videoValidation.hasVideos ? (
+            <>
+              <MediaGrid columns="3">
+                {videoDocumentationItems.map((video, idx) => (
+                  <FadeInSection key={`${video.id}-${idx}`} delay={0.03 * idx}>
+                    <VideoCard
+                      title={video.title}
+                      description={video.description}
+                      thumbnail={video.thumbnail}
+                      videoUrl={video.videoUrl}
+                      placeholder={video.placeholder}
+                      onClick={() => setActiveVideoItem(video)}
+                    />
+                  </FadeInSection>
+                ))}
+              </MediaGrid>
+
+              <FadeInSection delay={0.2}>
+                <YouTubeCTA
+                  youtubeUrl={videoDocumentationConfig.youtubeChannelUrl}
+                />
               </FadeInSection>
-            ))}
-          </div>
+            </>
+          ) : (
+            <>
+              <EmptyVideoSectionState />
+              <FadeInSection delay={0.1}>
+                <YouTubeCTA
+                  youtubeUrl={videoDocumentationConfig.youtubeChannelUrl}
+                />
+              </FadeInSection>
+            </>
+          )}
         </section>
       </main>
 
-      <AnimatePresence>
-        {activeItem && (
-          <motion.div
-            className="fixed inset-0 z-70 flex items-center justify-center bg-black/75 px-4"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setActiveItem(null)}
-          >
-            <motion.div
-              className="w-full max-w-2xl rounded-2xl border border-white/15 bg-[#171717] p-6"
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              onClick={(event) => event.stopPropagation()}
-            >
-              <h3 className="text-xl font-semibold">{activeItem.title}</h3>
-              <p className="mt-1 text-sm text-red-100">{activeItem.category}</p>
-              <div className="mt-4 rounded-xl border border-dashed border-white/25 bg-[#252525] px-3 py-16 text-center text-white/70">
-                {activeItem.placeholder}
-              </div>
-              <button className="mt-5 rounded-full bg-[#C62828] px-5 py-2 text-sm font-semibold" onClick={() => setActiveItem(null)}>
-                Close
-              </button>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Lightboxes */}
+      <Lightbox
+        isOpen={activeGalleryItem !== null}
+        onClose={() => setActiveGalleryItem(null)}
+        title={activeGalleryItem?.title || ""}
+        category={activeGalleryItem?.category || ""}
+        image={activeGalleryItem?.image}
+        placeholder={activeGalleryItem?.placeholder}
+      />
 
+      <VideoLightbox
+        isOpen={activeVideoItem !== null}
+        onClose={() => setActiveVideoItem(null)}
+        title={activeVideoItem?.title || ""}
+        description={activeVideoItem?.description || ""}
+        videoUrl={activeVideoItem?.videoUrl || ""}
+      />
+
+      {/* Footer */}
       <footer className="border-t border-white/10 bg-[#111111] px-5 py-8 text-center text-sm text-white/60">
-        <p>FIJI Gallery - Structured documentation of training excellence, growth, and community spirit.</p>
-        <p className="mt-2">Copyright {year} FIJI (Firman Ishikawaryu Ju-Jutsu Indonesia). All rights reserved.</p>
+        <p>
+          FIJI Gallery - Structured documentation of training excellence,
+          growth, and community spirit.
+        </p>
+        <p className="mt-2">
+          Copyright {year} FIJI (Firman Ishikawaryu Ju-Jutsu Indonesia). All
+          rights reserved.
+        </p>
       </footer>
     </div>
   );

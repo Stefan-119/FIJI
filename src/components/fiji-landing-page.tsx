@@ -1,14 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import {
-  memo,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import {
   CalendarClock,
@@ -16,183 +9,23 @@ import {
   ChevronLeft,
   ChevronRight,
   Dumbbell,
-  HeartPulse,
   MapPin,
   MessageCircle,
   Phone,
-  Shield,
-  Sparkles,
   Star,
   UserRound,
   Users,
+  Shield,
 } from "lucide-react";
 import SiteHeader from "@/components/site-header";
-
-const benefits = [
-  {
-    title: "Health & Fitness",
-    description:
-      "Improve endurance, flexibility, coordination, and full-body strength.",
-    icon: HeartPulse,
-    accent: "bg-[#F1C40F]",
-  },
-  {
-    title: "Confidence & Discipline",
-    description:
-      "Build focus, emotional control, respect, and resilient character.",
-    icon: Sparkles,
-    accent: "bg-[#2ECC71]",
-  },
-  {
-    title: "Self-Defense & Safety",
-    description:
-      "Learn practical defense, anti-bullying awareness, and risk prevention.",
-    icon: Shield,
-    accent: "bg-[#3498DB]",
-  },
-];
-
-const programs = [
-  {
-    title: "Kids Class",
-    subtitle: "3-12 years",
-    description:
-      "Fun structured movement, confidence building, and anti-bullying character growth.",
-    placeholder: "[Kids Training Icon Placeholder]",
-  },
-  {
-    title: "Teen Class",
-    subtitle: "13-17 years",
-    description:
-      "Athletic discipline, focus, and practical self-defense fundamentals for youth development.",
-    placeholder: "[Teen Class Icon Placeholder]",
-  },
-  {
-    title: "Adult Training",
-    subtitle: "18+ years",
-    description:
-      "Strength, mobility, stress release, and realistic techniques for daily safety and fitness.",
-    placeholder: "[Adult Training Icon Placeholder]",
-  },
-  {
-    title: "Senior Training",
-    subtitle: "50+ years",
-    description:
-      "Low-impact training focused on balance, flexibility, stability, and healthy longevity.",
-    placeholder: "[Senior Training Icon Placeholder]",
-  },
-  {
-    title: "Women Self-Defense",
-    subtitle: "All levels",
-    description:
-      "Empowering sessions with practical scenarios, awareness skills, and confidence coaching.",
-    placeholder: "[Women Self-Defense Icon Placeholder]",
-  },
-  {
-    title: "Private Class",
-    subtitle: "Customized",
-    description:
-      "One-on-one coaching tailored to personal goals, pace, and technical priorities.",
-    placeholder: "[Private Class Icon Placeholder]",
-  },
-  {
-    title: "Group Class",
-    subtitle: "All ages",
-    description:
-      "Structured team sessions for schools, communities, and organizations with shared goals.",
-    placeholder: "[Group Class Icon Placeholder]",
-  },
-];
-
-const gallerySlides = [
-  {
-    title: "Kids Training",
-    description:
-      "Foundational movement, focus drills, and confident learning atmosphere.",
-    placeholder: "[Kids Training Placeholder]",
-  },
-  {
-    title: "Self-Defense Seminar",
-    description:
-      "Practical safety training with realistic scenario-based techniques.",
-    placeholder: "[Self-Defense Seminar Placeholder]",
-  },
-  {
-    title: "Group Technique Class",
-    description:
-      "Collaborative partner drills with technical correction and mentorship.",
-    placeholder: "[Group Technique Placeholder]",
-  },
-  {
-    title: "Community Activities",
-    description:
-      "Shared events that strengthen character, teamwork, and positive values.",
-    placeholder: "[Community Activity Placeholder]",
-  },
-];
-
-const scheduleRows = [
-  {
-    day: "Monday",
-    kids: "16:00 - 17:00",
-    teenAdult: "19:00 - 20:30",
-    women: "20:30 - 21:15",
-  },
-  {
-    day: "Wednesday",
-    kids: "16:00 - 17:00",
-    teenAdult: "19:00 - 20:30",
-    women: "20:30 - 21:15",
-  },
-  {
-    day: "Friday",
-    kids: "16:00 - 17:00",
-    teenAdult: "19:00 - 20:30",
-    women: "20:30 - 21:15",
-  },
-  {
-    day: "Saturday",
-    kids: "09:00 - 10:00",
-    teenAdult: "10:30 - 12:00",
-    women: "12:00 - 12:45",
-  },
-];
-
-const testimonials = [
-  {
-    name: "Parent of Kids Student",
-    role: "Family Program",
-    quote:
-      "My child became more disciplined and confident after just a few months at FIJI.",
-  },
-  {
-    name: "Women Participant",
-    role: "Self-Defense Program",
-    quote:
-      "The instructors are patient and professional. I feel safer and much stronger now.",
-  },
-  {
-    name: "Adult Trainee",
-    role: "Evening Class",
-    quote:
-      "Training here improved my fitness, mindset, and consistency in daily life.",
-  },
-];
-
-const faqs = [
-  {
-    q: "Is FIJI beginner-friendly?",
-    a: "Yes. Our classes are designed for complete beginners and advanced students with safe progressions.",
-  },
-  {
-    q: "Can women join private self-defense sessions?",
-    a: "Absolutely. We provide women-only friendly options, private coaching, and real-life scenario drills.",
-  },
-  {
-    q: "What should I bring to my first class?",
-    a: "Bring comfortable training clothes, water, and a positive mindset. Uniform guidance is provided after registration.",
-  },
-];
+import {
+  benefits,
+  programs,
+  gallerySlides,
+  scheduleRows,
+  testimonials,
+  faqs,
+} from "@/constants/programs";
 
 const FadeInSection = memo(function FadeInSection({
   children,
