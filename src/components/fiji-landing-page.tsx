@@ -216,6 +216,7 @@ const FadeInSection = memo(function FadeInSection({
 export default function FijiLandingPage() {
   const [openFaq, setOpenFaq] = useState(-1);
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [visibleItems, setVisibleItems] = useState(1);
   const carouselRef = useRef<HTMLDivElement>(null);
   const [formData, setFormData] = useState({
     fullName: "",
@@ -265,21 +266,40 @@ export default function FijiLandingPage() {
   }, []);
 
   useEffect(() => {
+    const updateVisibleItems = () => {
+      if (window.innerWidth >= 1024) {
+        // Desktop (lg)
+        setVisibleItems(3);
+      } else if (window.innerWidth >= 768) {
+        // Tablet (md)
+        setVisibleItems(2);
+      } else {
+        setVisibleItems(1);
+      }
+    };
+
+    updateVisibleItems();
+    window.addEventListener("resize", updateVisibleItems);
+    return () => window.removeEventListener("resize", updateVisibleItems);
+  }, []);
+
+  // Total scrollable dots = Total items - visible items + 1
+  const totalDots = gallerySlides.length - visibleItems + 1;
+
+  useEffect(() => {
     const timer = window.setInterval(() => {
       const container = carouselRef.current;
       if (!container) return;
 
-      const isAtEnd =
-        Math.ceil(container.scrollLeft + container.offsetWidth) >=
-        container.scrollWidth;
-
+      // Use the totalDots calculation to decide when to loop back
+      const isAtEnd = currentSlide >= totalDots - 1;
       const nextIndex = isAtEnd ? 0 : currentSlide + 1;
 
       scrollToSlide(nextIndex);
     }, 5000);
 
     return () => window.clearInterval(timer);
-  }, [currentSlide, scrollToSlide]);
+  }, [currentSlide, scrollToSlide, totalDots]);
 
   return (
     <div className="bg-[#111111] text-white">
@@ -608,9 +628,9 @@ export default function FijiLandingPage() {
               </div>
 
               <div className="flex flex-wrap items-center justify-end gap-2">
-                {gallerySlides.map((slide, idx) => (
+                {Array.from({ length: totalDots }).map((_, idx) => (
                   <button
-                    key={slide.title}
+                    key={idx}
                     type="button"
                     aria-label={`Go to slide ${idx + 1}`}
                     onClick={() => scrollToSlide(idx)}
